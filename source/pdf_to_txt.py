@@ -58,7 +58,7 @@ class ProtocolXMLReader:
         this.search_date_regex = re.compile("<DATUM>(.*)<\/DATUM>")
         this.search_text_regex = re.compile("<TEXT>(.*)<\/TEXT>")
         this.search_members_pattern = "(.*?)\((.*)\)(?:\.|\s)*\d(?:\.|\s)*[A-Z]"
-        this.search_interjection_pattern = "(.*?)"
+        this.search_interjection_pattern = "\n\(.*?\)\n"
         this.date_format = "%d.%m.%Y"
 
     def get_raw_text(self, from_file):
