@@ -5,6 +5,8 @@ from pdfminer.pdfinterp import PDFPageInterpreter, PDFResourceManager
 from pdfminer.pdfpage import PDFPage, PDFTextExtractionNotAllowed
 from pdfminer.pdfparser import PDFParser
 from tika import parser
+import datetime
+import re
 
 def convert_pdf_to_txt(path):
     rsrcmgr = PDFResourceManager()
@@ -50,3 +52,46 @@ raw = parser.from_file('first_session.pdf')
 
 # Regex for capturing parliament member affiliations (.*?)\((.*)\)(?:\.|\s)*\d(?:\.|\s)*[A-Z]
 print(raw['content'])
+
+class ProtocolXMLReader:
+    def __init__(self):
+        this.search_date_regex = re.compile("<DATUM>(.*)<\/DATUM>")
+        this.search_text_regex = re.compile("<TEXT>(.*)<\/TEXT>")
+        this.search_members_pattern = "(.*?)\((.*)\)(?:\.|\s)*\d(?:\.|\s)*[A-Z]"
+        this.search_interjection_pattern = "(.*?)"
+        this.date_format = "%d.%m.%Y"
+
+    def get_raw_text(self, from_file):
+        raw_text = None
+        with open(from_file) as f:
+            raw_text = f.readlines()
+        return raw_text
+
+    def get_protocol_data(self, from_file):
+        raw_text = get_raw_text(from_file)
+        text = self.search_text_regex.match(raw_text).group(1)
+        date = self.search_date_regex.match(raw_text).group(1)
+        datetime_date = datetime.datetime.strptime(date, this.date_format)
+
+        protocolData = ProtocolData(text, date, datetime_date)
+
+        for match in re.findall(this.search_members_pattern):
+            protocolData.add_member(match.group(1), match.group(2))
+
+        for match in re.findall(this.search_interjection_pattern):
+            protocolData.add_interjection(match.group(1))
+            
+
+
+class ProtocolData:
+    def __init__(self, text, datetime_date):
+        self.date = None
+        self.memberAffiliations = {}
+        self.text = None
+        self.interjections = []
+
+    def add_member(self, name, party):
+        memberAffiliations[name] = party
+
+    def add_interjection(self, interjection):
+        self.interjections.append(interjection)
