@@ -104,6 +104,28 @@ class ProtocolData:
         print(self.text)
         print(self.interjection_locations)
 
+class ProcessedData:
+    def __init__(self):
+        pass
+
+
+class ProtocolDataProcessor:
+    def __init__(self):
+        pass
+
+    """
+
+        ### Parameters
+    1. a : ProtocolData
+        - The protocol data to be processed
+
+    ### Returns
+    - Any
+        - [description]
+    """
+    def process_data(self, data):
+        pass
+
 
 xmlReader = ProtocolXMLReader()
 data = xmlReader.get_protocol_data("01001.xml")
