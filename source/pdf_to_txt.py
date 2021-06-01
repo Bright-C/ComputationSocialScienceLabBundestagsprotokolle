@@ -7,6 +7,9 @@
 #import tika
 import datetime
 import re
+import pandas as pd
+import matplotlib.pyplot as plt
+import itertools
 
 def convert_pdf_to_txt(path):
     rsrcmgr = PDFResourceManager()
@@ -78,19 +81,18 @@ class ProtocolXMLReader:
         for match in re.finditer(self.search_members_pattern, raw_text):
             protocolData.add_member(match.group(1), match.group(2))
 
-        for match in re.finditer(self.search_interjection_pattern, raw_text):
+        for match in re.finditer(self.search_interjection_pattern, text):
             protocolData.add_interjection(match.group(1), match.start())
 
         return protocolData
             
-
-
 class ProtocolData:
     def __init__(self, text, datetime_date):
         self.date = datetime_date
         self.member_affiliations = {}
         self.text = text
         self.interjection_locations = {}
+        self.words_preceding_interjections = {}
 
     def add_member(self, name, party):
         self.member_affiliations[name] = party
@@ -98,11 +100,22 @@ class ProtocolData:
     def add_interjection(self, interjection, location):
         self.interjection_locations[interjection] = location
 
+    def count_word_preceding_interjection(self, word):
+        self.words_preceding_interjections[word] = self.words_preceding_interjections.get(word, 0) + 1
+
     def print_data(self):
         print(self.date)
         print(self.member_affiliations)
         print(self.text)
         print(self.interjection_locations)
+        print(self.words_preceding_interjections)
+
+    def print_data_graph(self):
+        drawnDict = dict(reversed(sorted(self.words_preceding_interjections.items(), key=lambda item: item[1])))
+        drawnDict = {k: v for k, v in drawnDict.items() if len(k) > 4 or k.isupper()}
+        drawnDict = dict(itertools.islice(drawnDict.items(), 15))
+        plt.bar(*zip(*drawnDict.items()))
+        plt.show()
 
 class ProcessedData:
     def __init__(self):
@@ -114,19 +127,31 @@ class ProtocolDataProcessor:
         pass
 
     """
-
         ### Parameters
-    1. a : ProtocolData
-        - The protocol data to be processed
+    1. data : ProtocolData
+        - The protocol data to perform processing on. The results of the evaluation should be written back to the object using setters.
 
     ### Returns
-    - Any
-        - [description]
+    - void
     """
     def process_data(self, data):
         pass
 
+class CountWordsPrecedingInterjection(ProtocolDataProcessor):
+    def __init__(self, neighborhood_character_distance):
+        super()
+        self.neighborhood_distance = neighborhood_character_distance
+
+    def process_data(self, data):
+        for interjection, location in data.interjection_locations.items():
+            preceding_neighbor_words = data.text[location - self.neighborhood_distance:location].split()
+
+            for word in preceding_neighbor_words:
+                data.count_word_preceding_interjection(word)
 
 xmlReader = ProtocolXMLReader()
+wordCounter = CountWordsPrecedingInterjection(50)
 data = xmlReader.get_protocol_data("01001.xml")
+wordCounter.process_data(data)
 data.print_data()
+data.print_data_graph()
