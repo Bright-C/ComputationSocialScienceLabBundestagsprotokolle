@@ -1,3 +1,6 @@
+# Project download data cache
+downloads_cache
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -131,3 +134,24 @@ dmypy.json
 /.vs/ComputationSocialScienceLabBundestagsprotokolle/v16/.suo
 /.vs/VSWorkspaceState.json
 /.vs/ProjectSettings.json
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+pytestdebug.log
+
+# operating system-related files
+# file properties cache/storage on macOS
+*.DS_Store
+# thumbnail cache on Windows
+Thumbs.db
