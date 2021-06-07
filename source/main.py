@@ -13,12 +13,14 @@ from protocol_data_processing import *
 from gensim import corpora, models, similarities, downloader
 
 xmlReader = ProtocolXMLReader()
-wordProcessor = Word2VecProcessor()
+commentTextMerger = MergeCommentWithPrecedingText()
+w2vProcessor = Word2VecProcessor()
 
 data = xmlReader.get_protocol_data("01001.xml")
 
 
-wordProcessor.process_data(data)
+commentTextMerger.process_data(data)
+w2vProcessor.process_data(data)
 
 data.print_data()
-data.print_data_graph()
+#data.print_data_graph()

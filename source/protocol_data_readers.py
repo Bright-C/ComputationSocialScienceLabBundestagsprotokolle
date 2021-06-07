@@ -32,8 +32,11 @@ class ProtocolXMLReader(ProtocolReader):
         for match in re.finditer(self.search_members_pattern, raw_text):
             protocolData.add_member(match.group(1), match.group(2))
 
+        last_match_end = 0
         for match in re.finditer(self.search_interjection_pattern, text):
+            protocolData.append_protocol_segment(PureTextSegment(text[last_match_end : match.start()]))
             protocolData.append_protocol_segment(Comment(match.group(1)))
+            last_match_end = match.end()
             #protocolData.add_interjection(match.group(1), match.start())
 
         return protocolData

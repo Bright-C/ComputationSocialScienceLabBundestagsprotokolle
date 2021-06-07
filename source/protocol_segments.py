@@ -38,5 +38,5 @@ class Comment(ProtocolSegment):
         pass
 
     def get_text_equivalent(self):
-        return self.text
+        return "COMMENT"
         pass

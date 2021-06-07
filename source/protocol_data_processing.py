@@ -4,6 +4,9 @@ import string
 from nltk.corpus import stopwords
 import re
 
+full_punctuation = string.punctuation + "—\n"
+translator = str.maketrans(full_punctuation, ' '*len(full_punctuation))
+
 class ProtocolDataProcessor:
     def __init__(self):
         pass
@@ -37,10 +40,7 @@ class MergeCommentWithPrecedingText(ProtocolDataProcessor):
         for i in range(len(data.protocol_segments)):
             if (type(data.protocol_segments[i]).__name__ == "Comment"):
                 if (type(data.protocol_segments[i - 1]).__name__ == "PureTextSegment"):
-                    data.protocol_segments[i - 1].text = data.protocol_segments[i - 1].text.rstrip(string.punctuation)
-
-full_punctuation = string.punctuation + "—\n"
-translator = str.maketrans(full_punctuation, ' '*len(full_punctuation))
+                    data.protocol_segments[i - 1].text = data.protocol_segments[i - 1].text.rstrip(full_punctuation) + " "
 
 class Word2VecProcessor(ProtocolDataProcessor):
     def process_data(self, data):
@@ -55,8 +55,10 @@ class Word2VecProcessor(ProtocolDataProcessor):
             sentence = sentence.translate(translator)
             sentence_words = sentence.split(" ")
             #sentence_words = [t.translate(translator) for t in sentence_words if t not in sw]
-            sentence_words = [t for t in sentence_words if not t.isspace() and len(t) > 0 and t not in sw]
-            split_sentences.append(sentence_words)
+            sentence_words = [t for t in sentence_words if not t.isspace() and len(t) > 0 and t.lower() not in sw]
+            if (len(sentence_words) > 0):
+                split_sentences.append(sentence_words)
 
         model = Word2Vec(sentences = split_sentences)
         model.save("word2vec.model")
+        print(model.predict_output_word(['COMMENT'], topn = 50))
