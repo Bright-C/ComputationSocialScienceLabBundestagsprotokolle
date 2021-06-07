@@ -1,3 +1,5 @@
+from enum import Enum
+
 class ProtocolSegment:
     """
         Abstract. Classes that represent parts of the protocol should inherit from this and implement get_text_equivalent.
@@ -7,6 +9,16 @@ class ProtocolSegment:
         - string
     """
     def get_text_equivalent(self):
+        pass
+
+class PureTextSegment(ProtocolSegment):
+    def __init__(self, text):
+        self.text = text
+        self.main_speaker = None
+        pass
+
+    def get_text_equivalent(self):
+        return self.text
         pass
 
 class CommentType(Enum):

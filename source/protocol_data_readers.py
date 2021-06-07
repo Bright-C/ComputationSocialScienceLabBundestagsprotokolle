@@ -1,8 +1,13 @@
+import re
+import datetime
+from protocol_data import ProtocolData
+from protocol_segments import *
+
 class ProtocolReader:
     def get_protocol_data(self, from_file):
         pass
 
-class ProtocolXMLReader:
+class ProtocolXMLReader(ProtocolReader):
     def __init__(self):
         self.search_date_regex = re.compile("<DATUM>(.*)<\/DATUM>")
         self.search_text_regex = re.compile("<TEXT>((?:.|\s)*)<\/TEXT>")
@@ -28,10 +33,11 @@ class ProtocolXMLReader:
             protocolData.add_member(match.group(1), match.group(2))
 
         for match in re.finditer(self.search_interjection_pattern, text):
-            protocolData.add_interjection(match.group(1), match.start())
+            protocolData.append_protocol_segment(Comment(match.group(1)))
+            #protocolData.add_interjection(match.group(1), match.start())
 
         return protocolData
             
-class ProtocolXMLReader2018Up:
+class ProtocolXMLReader2018Up(ProtocolReader):
         def get_protocol_data(self, from_file):
             pass

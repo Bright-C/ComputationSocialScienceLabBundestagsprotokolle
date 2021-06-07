@@ -5,22 +5,19 @@
 #from pdfminer.pdfpage import PDFPage, PDFTextExtractionNotAllowed
 #from pdfminer.pdfparser import PDFParser
 #import tika
-import datetime
-import re
 import pandas as pd
 import matplotlib.pyplot as plt
 import itertools
-from enum import Enum
+from protocol_data_readers import *
+from protocol_data_processing import *
 from gensim import corpora, models, similarities, downloader
 
 xmlReader = ProtocolXMLReader()
-wordCounter = CountWordsPrecedingInterjection(200)
-wordProcessor = Vector2WordProcessor()
+wordProcessor = Word2VecProcessor()
 
 data = xmlReader.get_protocol_data("01001.xml")
 
 
-wordCounter.process_data(data)
 wordProcessor.process_data(data)
 
 data.print_data()

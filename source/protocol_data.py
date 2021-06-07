@@ -15,7 +15,7 @@ class ProtocolData:
         self.member_affiliations[name] = party
 
     def append_protocol_segment(self, segment):
-        self.protocol_segment.append(comment)
+        self.protocol_segments.append(segment)
 
     def count_word_preceding_interjection(self, word):
         self.words_preceding_interjections[word] = self.words_preceding_interjections.get(word, 0) + 1
@@ -34,3 +34,9 @@ class ProtocolData:
         drawnDict = dict(itertools.islice(drawnDict.items(), 15))
         plt.bar(*zip(*drawnDict.items()))
         plt.show()
+
+    def get_full_text(self):
+        full_text = ""
+        for segment in self.protocol_segments:
+            full_text += segment.get_text_equivalent()
+        return full_text
