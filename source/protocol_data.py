@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 class ProtocolData:
     def __init__(self, text, datetime_date):
         self.date = datetime_date
@@ -29,10 +31,13 @@ class ProtocolData:
         print(len(self.interjection_locations))
 
     def print_data_graph(self):
-        drawnDict = dict(reversed(sorted(self.words_preceding_interjections.items(), key=lambda item: item[1])))
-        drawnDict = {k: v for k, v in drawnDict.items() if len(k) > 4 or k.isupper()}
-        drawnDict = dict(itertools.islice(drawnDict.items(), 15))
-        plt.bar(*zip(*drawnDict.items()))
+        #drawnDict = dict(reversed(sorted(self.words_preceding_interjections.items(), key=lambda item: item[1])))
+        #drawnDict = {k: v for k, v in drawnDict.items() if len(k) > 4 or k.isupper()}
+        #drawnDict = dict(itertools.islice(drawnDict.items(), 15))
+        prediction = self.model.predict_output_word(['COMMENT'], topn = 20)
+        plt.bar([t[0] for t in prediction], [t[1] for t in prediction])
+        axes = plt.gca()
+        axes.set_ylim([0.011363, 0.011366])
         plt.show()
 
     def get_full_text(self):

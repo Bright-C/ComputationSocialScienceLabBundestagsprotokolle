@@ -23,4 +23,4 @@ commentTextMerger.process_data(data)
 w2vProcessor.process_data(data)
 
 data.print_data()
-#data.print_data_graph()
+data.print_data_graph()

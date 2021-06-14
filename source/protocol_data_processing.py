@@ -62,3 +62,4 @@ class Word2VecProcessor(ProtocolDataProcessor):
         model = Word2Vec(sentences = split_sentences)
         model.save("word2vec.model")
         print(model.predict_output_word(['COMMENT'], topn = 50))
+        data.model = model
