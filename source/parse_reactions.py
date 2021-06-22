@@ -9,8 +9,8 @@ def tokenize(comments):
     nltk.download('punkt', download_dir='downloads_cache')
     tokens = [token.lower() for c in comments for token in nltk.word_tokenize(c)]
     return tokens
-    
-    
+
+
 def filter_words(tokens):
 
     # remove single punctuation: "[", "]", ":", "," etc
@@ -19,7 +19,7 @@ def filter_words(tokens):
     # remove stopwords
     nltk.download('stopwords', download_dir='downloads_cache')
     tokens = [t for t in tokens if t not in stopwords.words('german')]
-    
+
     return tokens
 
 
@@ -30,17 +30,27 @@ def analyze_words(tokens, top_count=50):
 
     return selected_words
 
+
 reactions = [['beifall'], ['zuruf', 'zurufe'], ['lachen'], ['heiterkeit'], ['sagen', 'sagt'], ['reden', 'rede'], ['hört'], ['wissen'], [ 'steht'], [ 'lesen'], ['kommen', 'kommt'], ['erzählen']]
 performers =  [['spd'], ['cdu/csu'], ['90/die grünen', '90/die' , '90/diegrünen'] ,['fdp'], ['afd'], ['linken', 'linke']]
 
+def as_reaction_and_performer(comments, reactions=reactions, performers=performers):
+    result = []
+    for c in comments:
+        c = c.lower()
+        result.append({
+            "reactions": [rarr[0] for rarr in reactions if any(r in c for r in rarr)],
+            "performers": [parr[0] for parr in performers if any(p in c for p in parr)]
+        })
+    return result
+
+
 class ReactionParser:
     @staticmethod
-    def as_reaction_and_performer(comments, reactions=reactions, performers=performers):
-        result = []
-        for c in comments:
-            c = c.lower()
-            result.append({
-                "reactions": [rarr[0] for rarr in reactions if any(r in c for r in rarr)],
-                "performers": [parr[0] for parr in performers if any(p in c for p in parr)]
-            })
+    def parse_comment(comment):
+        c = comment.lower()
+        result = str({
+            "reactions": [rarr[0] for rarr in reactions if any(r in c for r in rarr)],
+            "performers": [parr[0] for parr in performers if any(p in c for p in parr)]
+        })
         return result
