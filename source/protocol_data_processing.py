@@ -3,8 +3,10 @@ import nltk
 import string
 from nltk.corpus import stopwords
 import re
+from collections import defaultdict
+import json
 
-full_punctuation = string.punctuation + "—\n"
+full_punctuation = string.punctuation + "—\n\t"
 translator = str.maketrans(full_punctuation, ' '*len(full_punctuation))
 
 class ProtocolDataProcessor:
@@ -46,7 +48,7 @@ class Word2VecProcessor(ProtocolDataProcessor):
     def process_data(self, data):
         super()
         nltk.download('stopwords')
-        full_sentences = re.split("\\.|!|\\?", data.get_full_text())
+        full_sentences = re.split("\\.|!|\\?|\t", data.get_full_text())
         # remove single punctuation: "[", "]", ":", "," etc
         
         split_sentences = []
@@ -59,7 +61,88 @@ class Word2VecProcessor(ProtocolDataProcessor):
             if (len(sentence_words) > 0):
                 split_sentences.append(sentence_words)
 
-        model = Word2Vec(sentences = split_sentences)
+        model = None
+        try: 
+            model = Word2Vec.load("word2vec.model")
+            model.build_vocab(split_sentences, update=True)
+            model.train(split_sentences, total_examples=model.corpus_count, epochs=model.epochs)
+        except FileNotFoundError:
+            model = Word2Vec(sentences = split_sentences)
+        
         model.save("word2vec.model")
         print(model.predict_output_word(['COMMENT'], topn = 50))
         data.model = model
+
+class WordFrequencyDataJSONEncoder(json.JSONEncoder):
+    def default(self, o):
+        return o.__dict__
+
+class WordFrequencyDataJSONDecoder(json.JSONDecoder):
+    def decode(self, o):
+        result = WordFrequencyStorageData(None, None)
+        result.__dict__ = json.loads(o)
+        return result
+
+class WordFrequencyStorageData:
+    def __init__(self, total_words, words_in_context):
+        self.total_words = total_words
+        self.words_in_context = words_in_context
+
+class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
+    def __init__(self, words_to_look_for, permanent_storage):
+        super()
+        self.words_to_look_for = words_to_look_for
+        self.permanent_storage = permanent_storage
+
+    def process_data(self, data):
+        super()
+
+        full_sentences = re.split("\\.|!|\\?|\t", data.get_full_text())
+        # remove single punctuation: "[", "]", ":", "," etc
+        
+        split_sentences = []
+        for sentence in full_sentences:
+            sw = stopwords.words("german")
+            sentence = sentence.translate(translator)
+            sentence_words = sentence.split(" ")
+            #sentence_words = [t.translate(translator) for t in sentence_words if t not in sw]
+            sentence_words = [t for t in sentence_words if not t.isspace() and len(t) > 0 and t.lower() not in sw]
+            if (len(sentence_words) > 0):
+                split_sentences.append(sentence_words)
+
+        try:
+            with open(self.permanent_storage, "r") as infile:
+                word_frequency_data = json.load(infile, cls = WordFrequencyDataJSONDecoder)
+        except FileNotFoundError:
+            word_frequency_data = WordFrequencyStorageData({}, {})
+
+        all_word_counts = defaultdict(float, word_frequency_data.total_words)
+        near_search_word_counts = defaultdict(float, word_frequency_data.words_in_context)
+
+
+        for sentence_words in split_sentences:
+            sentence_word_count = defaultdict(float)
+            sentence_contained_search_word = False
+            for word in sentence_words:
+                if word in self.words_to_look_for:
+                    sentence_contained_search_word = True
+                    continue
+                sentence_word_count[word] += 1
+
+            for key, value in sentence_word_count.items():
+                all_word_counts[key] += value
+
+                if sentence_contained_search_word:
+                    near_search_word_counts[key] += value
+
+        for word in near_search_word_counts.keys():
+            near_search_word_counts[word] /= all_word_counts[word]
+
+        sorted_frequencies = sorted(near_search_word_counts.items(), key=lambda x: x[1], reverse=True)
+        data.total_searched_words = all_word_counts
+        data.most_frequent_words_near_search_words = near_search_word_counts
+
+        with open(self.permanent_storage, "w") as outfile:
+            json.dump(WordFrequencyStorageData(all_word_counts, sorted_frequencies), outfile, cls = WordFrequencyDataJSONEncoder)
+
+        print(sorted_frequencies)

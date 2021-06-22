@@ -1,5 +1,6 @@
 import re
 import datetime
+from gensim.models import Word2Vec
 from protocol_data import ProtocolData
 from protocol_segments import *
 
@@ -42,5 +43,11 @@ class ProtocolXMLReader(ProtocolReader):
         return protocolData
             
 class ProtocolXMLReader2018Up(ProtocolReader):
-        def get_protocol_data(self, from_file):
-            pass
+    def get_protocol_data(self, from_file):
+        pass
+
+class ProtocolModelOnlyReader(ProtocolReader):
+    def get_protocol_data(self, from_file):
+        protocolData = ProtocolData(None, None)
+        protocolData.model = Word2Vec.load(from_file)
+        return protocolData
