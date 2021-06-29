@@ -6,7 +6,7 @@ import re
 from collections import defaultdict
 import json
 
-full_punctuation = string.punctuation + "—\n\t"
+full_punctuation = string.punctuation + "—\n\t„“"
 translator = str.maketrans(full_punctuation, ' '*len(full_punctuation))
 
 class ProtocolDataProcessor:
@@ -97,6 +97,7 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
     def process_data(self, data):
         super()
 
+        # Debatable whether want to use capitalization or not.
         full_sentences = re.split("\\.|!|\\?|\t", data.get_full_text())
         # remove single punctuation: "[", "]", ":", "," etc
         
@@ -135,14 +136,14 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
                 if sentence_contained_search_word:
                     near_search_word_counts[key] += value
 
-        for word in near_search_word_counts.keys():
-            near_search_word_counts[word] /= all_word_counts[word]
+        #for word in near_search_word_counts.keys():
+        #    near_search_word_counts[word] /= all_word_counts[word]
 
-        sorted_frequencies = sorted(near_search_word_counts.items(), key=lambda x: x[1], reverse=True)
+        sorted_frequencies = dict(sorted(near_search_word_counts.items(), key=lambda x: x[1], reverse=True))
         data.total_searched_words = all_word_counts
         data.most_frequent_words_near_search_words = near_search_word_counts
 
         with open(self.permanent_storage, "w") as outfile:
-            json.dump(WordFrequencyStorageData(all_word_counts, sorted_frequencies), outfile, cls = WordFrequencyDataJSONEncoder)
+            json.dump(WordFrequencyStorageData(all_word_counts, sorted_frequencies), outfile, cls = WordFrequencyDataJSONEncoder, indent = 4)
 
         print(sorted_frequencies)
