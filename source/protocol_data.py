@@ -53,11 +53,30 @@ class ProtocolData:
         plt.barh([t[0] for t in prediction], [t[1] for t in prediction])
         #axes = plt.gca()
         #axes.set_ylim([0.011363, 0.011366])
-
-
-
-
         plt.show()
+
+    def plot_significant_words(self):
+        frequency_data = [(key, value, self.total_searched_words[key] - value) for (key, value) in self.most_frequent_words_near_search_words.items()]
+        df = pd.DataFrame(frequency_data, columns=["word", "comments", "no_comments"])
+        df = df.set_index("word")
+        significant_words = chisq_and_posthoc_corrected(df)
+        significance_filtered_words = [(key, value) for (key, value) in self.most_frequent_words_near_search_words.items() if key in significant_words if self.total_searched_words[key] > 3]
+        relative_frequency_filtered_words = [(key, value / self.total_searched_words[key]) for (key, value) in significance_filtered_words]
+        prediction = sorted(relative_frequency_filtered_words[:20], key=lambda x: x[1], reverse=False)
+        plt.barh([t[0] for t in prediction], [t[1] for t in prediction])
+        plt.show()
+
+    def plot_word_count(self, search_pattern):
+        frequency_data = [(key, value, self.total_searched_words[key] - value) for (key, value) in self.most_frequent_words_near_search_words.items()]
+        df = pd.DataFrame(frequency_data, columns=["word", "comments", "no_comments"])
+        df = df.set_index("word")
+        significant_words = chisq_and_posthoc_corrected(df)
+        significance_filtered_words = [(key, value) for (key, value) in self.most_frequent_words_near_search_words.items() if key in significant_words]
+        relative_frequency_filtered_words = [(key, value / self.total_searched_words[key]) for (key, value) in significance_filtered_words]
+        prediction = sorted(relative_frequency_filtered_words[:20], key=lambda x: x[1], reverse=False)
+        plt.barh([t[0] for t in prediction], [t[1] for t in prediction])
+        plt.show()
+
 
     def get_full_text(self):
         full_text = ""

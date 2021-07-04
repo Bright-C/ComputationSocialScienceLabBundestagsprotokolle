@@ -66,6 +66,8 @@ class ReactionParser:
         cstr = comment.lower()
         cstr = unparentheses(cstr)
         cstr = replace_special_cases(cstr)
+
+        nltk.download('punkt')
         cs = sent_tokenize(cstr, language="german")
 
         # parse comments

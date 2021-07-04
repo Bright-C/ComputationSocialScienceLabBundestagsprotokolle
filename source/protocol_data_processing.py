@@ -4,7 +4,7 @@ import string
 from nltk.corpus import stopwords
 import re
 from collections import defaultdict
-import json
+from json_coder_utility import *
 
 full_punctuation = string.punctuation + "—\n\t„“"
 translator = str.maketrans(full_punctuation, ' '*len(full_punctuation))
@@ -72,21 +72,6 @@ class Word2VecProcessor(ProtocolDataProcessor):
         model.save("word2vec.model")
         print(model.predict_output_word(['COMMENT'], topn = 50))
         data.model = model
-
-class WordFrequencyDataJSONEncoder(json.JSONEncoder):
-    def default(self, o):
-        return o.__dict__
-
-class WordFrequencyDataJSONDecoder(json.JSONDecoder):
-    def decode(self, o):
-        result = WordFrequencyStorageData(None, None)
-        result.__dict__ = json.loads(o)
-        return result
-
-class WordFrequencyStorageData:
-    def __init__(self, total_words, words_in_context):
-        self.total_words = total_words
-        self.words_in_context = words_in_context
 
 class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
     def __init__(self, words_to_look_for, permanent_storage):

@@ -1,4 +1,5 @@
 from enum import Enum
+from parse_reactions import ReactionParser
 
 class ProtocolSegment:
     """
@@ -38,5 +39,5 @@ class Comment(ProtocolSegment):
         pass
 
     def get_text_equivalent(self):
-        return "COMMENT. "
+        return (ReactionParser.parse_comment(self.text) + ". ")
         pass

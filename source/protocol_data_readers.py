@@ -2,7 +2,9 @@ import re
 import datetime
 from gensim.models import Word2Vec
 from protocol_data import ProtocolData
+from collections import defaultdict
 from protocol_segments import *
+from json_coder_utility import *
 
 class ProtocolReader:
     def get_protocol_data(self, from_file):
@@ -50,4 +52,21 @@ class ProtocolModelOnlyReader(ProtocolReader):
     def get_protocol_data(self, from_file):
         protocolData = ProtocolData(None, None)
         protocolData.model = Word2Vec.load(from_file)
+        return protocolData
+
+class ProtocolJsonOnlyReader(ProtocolReader):
+    def get_protocol_data(self, from_file):
+        protocolData = ProtocolData(None, None)
+
+        try:
+            with open(from_file, "r") as infile:
+                word_frequency_data = json.load(infile, cls = WordFrequencyDataJSONDecoder)
+        except FileNotFoundError:
+            word_frequency_data = WordFrequencyStorageData({}, {})
+
+        all_word_counts = defaultdict(float, word_frequency_data.total_words)
+        near_search_word_counts = defaultdict(float, word_frequency_data.words_in_context)
+        protocolData.total_searched_words = all_word_counts
+        protocolData.most_frequent_words_near_search_words = near_search_word_counts
+
         return protocolData
