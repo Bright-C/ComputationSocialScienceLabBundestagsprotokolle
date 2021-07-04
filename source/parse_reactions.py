@@ -1,8 +1,11 @@
 import nltk
-import string
+from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
+import string
 import itertools
 import collections
+import re
+
 
 def tokenize(comments):
     # tokenize the comment as words
@@ -32,7 +35,8 @@ def analyze_words(tokens, top_count=50):
 
 
 reactions = [['beifall'], ['zuruf', 'zurufe'], ['lachen'], ['heiterkeit'], ['sagen', 'sagt'], ['reden', 'rede'], ['hört'], ['wissen'], [ 'steht'], [ 'lesen'], ['kommen', 'kommt'], ['erzählen']]
-performers =  [['spd'], ['cdu/csu'], ['gruene', 'grünen', '90/die grünen', '90/die' , '90/diegrünen'] ,['fdp'], ['afd'], ['linke', 'linken']]
+performers =  [['spd'], ['cdu/csu'], ['gruene', 'grünen', '90/die' , '90/diegrünen', 'bündnis', 'bündnisses'], ['fdp'], ['afd'], ['linke', 'linken']]
+
 
 def as_reaction_and_performer(comments, reactions=reactions, performers=performers):
     result = []
@@ -45,33 +49,41 @@ def as_reaction_and_performer(comments, reactions=reactions, performers=performe
     return result
 
 
+def replace_special_cases(string):
+    string = re.sub(r"abg\.", "Abgeordneten", string, flags=re.IGNORECASE)
+    string = re.sub(r"–", ".", string, flags=re.IGNORECASE)
+    return string
+
+
+def unparentheses(string):
+    return string[1:-1] if string[1] == "(" and string[-1] == ")" else string
+
+
 class ReactionParser:
     @staticmethod
     def parse_comment(comment):
-        c = comment.lower()
+        # preprocess
+        cstr = comment.lower()
+        cstr = unparentheses(cstr)
+        cstr = replace_special_cases(cstr)
+        cs = sent_tokenize(cstr, language="german")
 
-        # parse reactions
-        parsed_reactions = [rarr[0] for rarr in reactions if any(r in c for r in rarr)]
-        parsed_reactions.sort()
-
-        # split the comment corresponding with reactions
-        split_comments = []
-        current_start = 0
-        next_start = -1
-        for i in range(1, len(parsed_reactions)):
-            next_start = c.index(parsed_reactions[i])
-            split_comments.append(c[current_start:next_start])
-            current_start = next_start
-        split_comments.append(c[current_start:])
-
-        # parse the performers for each reaction
-        parsed_performers = []
-        for sub_c in split_comments:
-            sub_performers = [parr[0] for parr in performers if any(p in sub_c for p in parr)]
-            sub_performers.sort()
+        # parse comments
+        parsed_reactions, parsed_performers = [], []
+        for c in cs:
+            if ":" in c:
+                sub_reaction = "SPEECH"
+            else:
+                # TODO: report error case (if parsed_reactions more then one)
+                rs = [rarr[0] for rarr in reactions if any(r in c for r in rarr)]
+                sub_reaction = rs[0] if len(rs) > 0 else "UNSPECIFIED"
+            sub_performers = sorted([parr[0] for parr in performers if any(p in c for p in parr)])
+            parsed_reactions.append(sub_reaction)
             parsed_performers.append(sub_performers)
 
+        parsed = sorted(zip(parsed_reactions, parsed_performers), key = lambda x:x[0])
+
         # parse result to string and normalize
-        result = ' '.join([str(r) + '_' + '_'.join(p) for r, p in zip(parsed_reactions, parsed_performers)])
+        result = ' '.join([str(r) + '_' + '_'.join(p) for r, p in parsed])
         result = result.replace('/', '_').upper()
         return result
