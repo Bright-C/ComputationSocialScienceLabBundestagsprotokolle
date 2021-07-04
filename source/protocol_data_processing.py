@@ -92,6 +92,7 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
     def __init__(self, words_to_look_for, permanent_storage):
         super()
         self.words_to_look_for = words_to_look_for
+        self.words_to_look_for_pattern = re.compile(words_to_look_for)
         self.permanent_storage = permanent_storage
 
     def process_data(self, data):
@@ -107,7 +108,7 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
             sentence = sentence.translate(translator)
             sentence_words = sentence.split(" ")
             #sentence_words = [t.translate(translator) for t in sentence_words if t not in sw]
-            sentence_words = [t for t in sentence_words if not t.isspace() and len(t) > 0 and t.lower() not in sw]
+            sentence_words = [t for t in sentence_words if not t.isspace() and not t.isdigit() and len(t) > 1 and t.lower() not in sw]
             if (len(sentence_words) > 0):
                 split_sentences.append(sentence_words)
 
@@ -125,7 +126,7 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
             sentence_word_count = defaultdict(float)
             sentence_contained_search_word = False
             for word in sentence_words:
-                if word in self.words_to_look_for:
+                if self.words_to_look_for_pattern.search(word):
                     sentence_contained_search_word = True
                     continue
                 sentence_word_count[word] += 1

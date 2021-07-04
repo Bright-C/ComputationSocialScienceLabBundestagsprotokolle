@@ -72,6 +72,6 @@ class ReactionParser:
             parsed_performers.append(sub_performers)
 
         # parse result to string and normalize
-        result = ' '.join([str(r) + '_' + '_'.join(p) for r, p in zip(parsed_reactions, parsed_performers)])
+        result = ' '.join([str("COMMENT_" + r) + '_' + '_'.join(p) for r, p in zip(parsed_reactions, parsed_performers)])
         result = result.replace('/', '_').upper()
         return result

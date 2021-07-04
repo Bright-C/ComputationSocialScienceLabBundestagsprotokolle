@@ -108,7 +108,7 @@ def chisq_and_posthoc_corrected(df):
 
     # checking significance
     # correction for multiple testing
-    reject_list, corrected_p_vals = multipletests(p_vals, method='fdr_bh', alpha=1)[:2]
+    reject_list, corrected_p_vals = multipletests(p_vals, method='fdr_bh', alpha=0.05)[:2]
     for p_val, corr_p_val, reject, comb in zip(p_vals, corrected_p_vals, reject_list, all_combinations):
         print(f"{comb}: p_value: {p_val:5f}; corrected: {corr_p_val:5f} ({get_asterisks_for_pval(p_val)}) reject: {reject}")
 
