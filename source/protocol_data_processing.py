@@ -6,7 +6,7 @@ import re
 from collections import defaultdict
 from json_coder_utility import *
 
-full_punctuation = string.punctuation + "—\n\t„“"
+full_punctuation = string.punctuation.replace("_", "") + "—\n\t„“"
 translator = str.maketrans(full_punctuation, ' '*len(full_punctuation))
 
 class ProtocolDataProcessor:
@@ -113,7 +113,6 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
             for word in sentence_words:
                 if self.words_to_look_for_pattern.search(word):
                     sentence_contained_search_word = True
-                    continue
                 sentence_word_count[word] += 1
 
             for key, value in sentence_word_count.items():
@@ -125,11 +124,9 @@ class CountRelativeFrequencyOfOtherWordsInSentence(ProtocolDataProcessor):
         #for word in near_search_word_counts.keys():
         #    near_search_word_counts[word] /= all_word_counts[word]
 
-        sorted_frequencies = dict(sorted(near_search_word_counts.items(), key=lambda x: x[1], reverse=True))
+        #sorted_frequencies = dict(sorted(near_search_word_counts.items(), key=lambda x: x[1], reverse=True))
         data.total_searched_words = all_word_counts
         data.most_frequent_words_near_search_words = near_search_word_counts
 
         with open(self.permanent_storage, "w") as outfile:
-            json.dump(WordFrequencyStorageData(all_word_counts, sorted_frequencies), outfile, cls = WordFrequencyDataJSONEncoder, indent = 4)
-
-        print(sorted_frequencies)
+            json.dump(WordFrequencyStorageData(all_word_counts, near_search_word_counts), outfile, cls = WordFrequencyDataJSONEncoder, indent = 4)

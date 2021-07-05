@@ -8,12 +8,15 @@ from os import listdir
 from os.path import isfile, join
 from pathlib import Path
 
-command = sys.argv[1] # Learn, Count, Predict
+#while len(sys.argv) < 5:
+#    sys.argv.append(None)
 
-#command = "learn"
-#json_in_out_file = "word_frequencies_new.txt"
-#search_pattern = "COMMENT"
-#protocoldir = "pre2018protocols"
+#sys.argv[1] = "learn"
+#sys.argv[2] = "word_frequencies_new.txt"
+#sys.argv[3] = ".*COMMENT.*"
+#sys.argv[4] = "pre2018protocols"
+
+command = sys.argv[1] # Learn, Count, Predict
 
 
 data = None
@@ -35,8 +38,10 @@ if command == "learn":
 
 elif command == "count":
     json_in_out_file = sys.argv[2]
+    search_pattern = sys.argv[3]
     jsonReader = ProtocolJsonOnlyReader()
     data = jsonReader.get_protocol_data(json_in_out_file)
+    data.plot_word_count(search_pattern)
 
 elif command == "predict":
     json_in_out_file = sys.argv[2]

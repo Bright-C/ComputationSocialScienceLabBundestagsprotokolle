@@ -1,4 +1,5 @@
 import nltk
+nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 from nltk.corpus import stopwords
 import string
@@ -56,7 +57,7 @@ def replace_special_cases(string):
 
 
 def unparentheses(string):
-    return string[1:-1] if string[1] == "(" and string[-1] == ")" else string
+    return string[1:-2] if string[0] == "(" and string[-1] == ")" else string
 
 
 class ReactionParser:
@@ -67,7 +68,6 @@ class ReactionParser:
         cstr = unparentheses(cstr)
         cstr = replace_special_cases(cstr)
 
-        nltk.download('punkt')
         cs = sent_tokenize(cstr, language="german")
 
         # parse comments

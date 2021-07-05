@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import itertools
 import pandas as pd
+import re
 from scipy.stats import chi2_contingency
 from statsmodels.sandbox.stats.multicomp import multipletests
 plt.rcParams["font.family"] = "Lucida Sans Unicode"
@@ -67,14 +68,12 @@ class ProtocolData:
         plt.show()
 
     def plot_word_count(self, search_pattern):
-        frequency_data = [(key, value, self.total_searched_words[key] - value) for (key, value) in self.most_frequent_words_near_search_words.items()]
-        df = pd.DataFrame(frequency_data, columns=["word", "comments", "no_comments"])
-        df = df.set_index("word")
-        significant_words = chisq_and_posthoc_corrected(df)
-        significance_filtered_words = [(key, value) for (key, value) in self.most_frequent_words_near_search_words.items() if key in significant_words]
-        relative_frequency_filtered_words = [(key, value / self.total_searched_words[key]) for (key, value) in significance_filtered_words]
-        prediction = sorted(relative_frequency_filtered_words[:20], key=lambda x: x[1], reverse=False)
-        plt.barh([t[0] for t in prediction], [t[1] for t in prediction])
+        pattern = re.compile(search_pattern)
+        plotted_words = []
+        for word, count in self.total_searched_words.items():
+            if pattern.search(word):
+                plotted_words.append([word, count])
+        plt.barh([t[0] for t in plotted_words], [t[1] for t in plotted_words])
         plt.show()
 
 
